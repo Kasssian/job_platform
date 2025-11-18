@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Резюме {{ resume.full_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 40px;
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #007bff;
+            font-size: 32px;
+        }
+
+        .header h2 {
+            margin: 10px 0;
+            color: #495057;
+            font-size: 22px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #007bff;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .skills {
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>{{ resume.full_name }}</h1>
+        <h2>{{ resume.position }}</h2>
+        {% if resume.salary_expectation %}
+            <p><strong>Ожидаемая зарплата:</strong> {{ resume.salary_expectation }} сом</p>
+        {% endif %}
+    </div>
+
+    <div class="info-grid">
+        <div><strong>Телефон:</strong> {{ resume.phone }}</div>
+        <div><strong>Email:</strong> {{ resume.email }}</div>
+        <div><strong>Город:</strong> {{ resume.location }}</div>
+        <div><strong>Опыт:</strong> {{ resume.experience_years }} лет</div>
+    </div>
+
+    {% if resume.about %}
+        <div class="section">
+            <h3>О себе</h3>
+            <p>{{ resume.about|linebreaks }}</p>
+        </div>
+    {% endif %}
+
+    {% if resume.skills %}
+        <div class="section">
+            <h3>Навыки</h3>
+            <div class="skills">
+                {% for skill in resume.skills|split:"," %}
+                    <span style="background:#007bff;color:white;padding:5px 12px;margin:5px;display:inline-block;border-radius:20px;">
+                {{ skill|trim }}
+            </span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if resume.education %}
+        <div class="section">
+            <h3>Образование</h3>
+            <p>{{ resume.education|linebreaks }}</p>
+        </div>
+    {% endif %}
+
+    {% if resume.work_experience %}
+        <div class="section">
+            <h3>Опыт работы</h3>
+            <p>{{ resume.work_experience|linebreaks }}</p>
+        </div>
+    {% endif %}
+
+    <div style="text-align:center;margin-top:50px;color:#6c757d;font-size:12px;">
+        Резюме сгенерировано на платформе «ТКРПО» • {{ now|date:"d.m.Y" }}
+    </div>
+</div>
+</body>
+</html>
