@@ -24,9 +24,6 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
-    """
-    Сообщение между пользователями (соискатель ↔ работодатель).
-    """
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages', verbose_name='Отправитель')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages',
                                   verbose_name='Получатель')
