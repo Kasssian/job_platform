@@ -1,7 +1,7 @@
 from django.db import models
 
 from core_models.models import User, Skill, Category
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 class JobseekerProfile(models.Model):
     user = models.OneToOneField(
@@ -18,6 +18,7 @@ class JobseekerProfile(models.Model):
     desired_salary_to = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True,
                                             verbose_name='Зарплата до')
     experience_years = models.PositiveSmallIntegerField(default=0, verbose_name='Опыт работы, лет')
+    phone_number = PhoneNumberField(region='KG')
     is_open_to_work = models.BooleanField(default=True, verbose_name='Ищу работу')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
 

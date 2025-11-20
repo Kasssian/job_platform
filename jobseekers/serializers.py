@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from core_models.models import Skill
 from core_models.serializers import SkillSerializer, CategorySerializer
-from .models import Profile, Resume, Education, Experience
+from .models import JobseekerProfile, Education, Experience
 
 User = get_user_model()
 
@@ -28,7 +28,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Profile
+        model = JobseekerProfile
         fields = [
             'id', 'user', 'phone', 'birth_date',
             'about', 'avatar', 'skills', 'skill_ids', 'is_premium',
@@ -36,56 +36,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
-
-class ResumeListSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    category = CategorySerializer()
-    skills = SkillSerializer(many=True)
-
-    class Meta:
-        model = Resume
-        fields = ['id', 'title', 'author', 'category', 'desired_salary_max', 'experience_years', 'is_active', 'skills',
-                  'created_at']
-
-
-class ResumeDetailSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    category = CategorySerializer()
-    skills = SkillSerializer(many=True)
-    education = EducationSerializer(many=True)
-    experience = ExperienceSerializer(many=True)
-
-    class Meta:
-        model = Resume
-        fields = '__all__'
-
-
-class ResumeCreateUpdateSerializer(serializers.ModelSerializer):
-    skill_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Skill.objects.all(), many=True, write_only=True, source='skills'
-    )
-    education = EducationSerializer(many=True, required=False)
-    experience = ExperienceSerializer(many=True, required=False)
-
-    class Meta:
-        model = Resume
-        fields = ['title', 'category', 'description', 'desired_salary', 'experience_years',
-                  'skill_ids', 'education', 'experience', 'is_active']
-
-    def create(self, validated_data):
-        skills = validated_data.pop('skills', [])
-        education_data = validated_data.pop('education', [])
-        experience_data = validated_data.pop('experience', [])
-
-        resume = Resume.objects.create(author=self.context['request'].user, **validated_data)
-        resume.skills.set(skills)
-
-        for edu in education_data:
-            Education.objects.create(resume=resume, **edu)
-        for exp in experience_data:
-            Experience.objects.create(resume=resume, **exp)
-
-        return resume
 
     def update(self, instance, validated_data):
         skills = validated_data.pop('skills', None)
