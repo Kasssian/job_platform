@@ -18,7 +18,7 @@ from .serializers import CategorySerializer, SkillSerializer, NotificationSerial
 
 class CustomLoginView(LoginView):
     template_name = 'core_models/login.html'
-    redirect_authenticated_user = True
+    # redirect_authenticated_user = True
 
 
 class HomeView(TemplateView):
@@ -48,7 +48,7 @@ class RegisterView(CreateView):
         if self.object.role == 'jobseeker':
             return redirect('jobseekers:profile')
         elif self.object.role == 'employer':
-            return redirect('employes:company_profile')
+            return redirect('employers:company_profile')
         return response
 
 
