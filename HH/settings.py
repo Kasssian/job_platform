@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'core_models.User'
 
 INSTALLED_APPS = [
+    'jazzmin',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',

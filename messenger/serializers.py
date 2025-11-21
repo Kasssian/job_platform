@@ -1,21 +1,29 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from jobseekers.serializers import ResumeListSerializer
-from employers.serializers import VacancyListSerializer
-from .models import Response, Message, Notification, Review
+from rest_framework import serializers
+
+from core_models.models import Notification, Review
+from jobseekers.models import JobseekerProfile
+from .models import Message
 
 User = get_user_model()
 
 
-class ResponseSerializer(serializers.ModelSerializer):
-    resume = ResumeListSerializer(read_only=True)
-    vacancy = VacancyListSerializer(read_only=True)
-    applicant = serializers.StringRelatedField(read_only=True)
+class ResumeInChatSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    desired_position = serializers.CharField()
+    experience_years = serializers.IntegerField()
+    skills = serializers.SerializerMethodField()
 
     class Meta:
-        model = Response
-        fields = ['id', 'vacancy', 'resume', 'applicant', 'cover_letter', 'status', 'created_at']
-        read_only_fields = ['applicant', 'status', 'created_at']
+        model = JobseekerProfile
+        fields = ['id', 'full_name', 'avatar', 'desired_position', 'experience_years', 'skills', 'desired_salary_from',
+                  'desired_salary_to']
+
+    def get_skills(self, obj):
+        return [
+            {"name": js.skill.name, "level": js.level, "level_display": js.get_level_display()}
+            for js in obj.skills.select_related('skill').all()[:10]]
 
 
 class MessageSerializer(serializers.ModelSerializer):
