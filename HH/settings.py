@@ -39,14 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'phonenumber_field',
     'core_models',
     'jobseekers',
     'messenger',
     'employers',
+    'channels',
 ]
-
-ASGI_APPLICATION = 'project.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
@@ -85,6 +85,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'HH.wsgi.application'
+ASGI_APPLICATION = 'HH.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryLayer",
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
