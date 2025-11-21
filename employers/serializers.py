@@ -1,4 +1,3 @@
-# employers/serializers.py
 from rest_framework import serializers
 
 from core_models.models import Skill

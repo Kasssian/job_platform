@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
+from core_models.models import Skill
 from core_models.serializers import SkillSerializer
-from .models import JobseekerProfile, Education, Experience, JobseekerSkill, Skill
+from .models import JobseekerProfile, Education, Experience, JobseekerSkill
 
 
 class EducationSerializer(serializers.ModelSerializer):

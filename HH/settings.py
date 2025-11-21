@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,8 +40,7 @@ INSTALLED_APPS = [
     'core_models',
     'jobseekers',
     'messenger',
-    'employers'
-    'dapfne',
+    'employers',
 ]
 
 ASGI_APPLICATION = 'project.asgi.application'

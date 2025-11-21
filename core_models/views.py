@@ -1,14 +1,15 @@
-# core_models/views.py
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
 
-from .forms import CustomUserCreationForm
+# from .forms import CustomUserCreationForm
 from .models import User, Category, Skill, Notification, Review
-from .serializers import UserSerializer, CategorySerializer, SkillSerializer, NotificationSerializer, ReviewSerializer
+from .serializers import CategorySerializer, SkillSerializer, NotificationSerializer, ReviewSerializer
 
 
 # HTML Views
@@ -26,15 +27,15 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
 
-class RegisterView(CreateView):
-    form_class = CustomUserCreationForm
-    template_name = 'core_models/register.html'
-    success_url = reverse_lazy('core_models:home')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        login(self.request, self.object)
-        return response
+# class RegisterView(CreateView):
+#     form_class = CustomUserCreationForm
+#     template_name = 'core_models/register.html'
+#     success_url = reverse_lazy('core_models:home')
+#
+#     def form_valid(self, form):
+#         response = super().form_valid(form)
+#         login(self.request, self.object)
+#         return response
 
 
 # API Views (DRF)
