@@ -57,6 +57,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -87,12 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'HH.wsgi.application'
 ASGI_APPLICATION = 'HH.asgi.application'
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryLayer",
-    }
-}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
