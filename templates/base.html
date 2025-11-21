@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}РаботаКГ — Платформа трудоустройства{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .notification-badge {
+            top: -8px;
+            right: -8px;
+            font-size: 0.7rem;
+        }
+
+        .message-badge {
+            top: -8px;
+            right: -8px;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'core:home' %}">
+            <i class="bi bi-briefcase-fill"></i> РаботаКГ
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'employes:vacancy_list' %}">Вакансии</a></li>
+                {% if user.is_authenticated and user.role == 'employer' %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'employes:vacancy_create' %}">+ Вакансия</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <!-- Уведомления -->
+                    <li class="nav-item dropdown position-relative">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            <span id="notification-count" class="badge bg-danger notification-badge"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="width: 320px;">
+                            <div id="notifications-list">Загрузка...</div>
+                        </ul>
+                    </li>
+
+                    <!-- Сообщения -->
+                    <li class="nav-item dropdown position-relative">
+                        <a class="nav-link" href="{% url 'messenger:inbox' %}">
+                            <i class="bi bi-chat-dots-fill fs-5"></i>
+                            <span id="message-count" class="badge bg-success message-badge"></span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                           data-bs-toggle="dropdown">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" class="rounded-circle me-2" width="32" height="32">
+                            {% else %}
+                                <i class="bi bi-person-circle fs-3"></i>
+                            {% endif %}
+                            {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% if user.role == 'jobseeker' %}
+                                <li><a class="dropdown-item" href="{% url 'jobseekers:cabinet' %}">Мой кабинет</a></li>
+                            {% elif user.role == 'employer' %}
+                                <li><a class="dropdown-item" href="{% url 'employes:employer_cabinet' %}">Кабинет
+                                    компании</a></li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Выйти</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'core:login' %}">Войти</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-light ms-2" href="{% url 'core:register' %}">Регистрация</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container mt-4 mb-5">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container text-center">
+        <p>© 2025 РаботаКГ — Платформа трудоустройства и рекрутинга</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Обновление счётчиков уведомлений и сообщений каждые 15 сек
+    setInterval(() => {
+        htmx.ajax('GET', '{% url "messenger:htmx_unread_notifications" %}', {
+            target: '#notifications-list',
+            swap: 'innerHTML'
+        });
+        htmx.ajax('GET', '{% url "messenger:htmx_unread_count" %}', {
+            target: '#notification-count',
+            swap: 'innerHTML'
+        });
+    }, 15000);
+
+    // Загрузка при старте
+    document.body.addEventListener('htmx:load', () => {
+        htmx.trigger('#notifications-list', 'htmx:load');
+    });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

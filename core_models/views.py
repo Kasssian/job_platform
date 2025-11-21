@@ -16,16 +16,6 @@ from .models import Skill, Notification, Review
 from .serializers import CategorySerializer, SkillSerializer, NotificationSerializer, ReviewSerializer
 
 
-# HTML Views
-class HomeView(TemplateView):
-    template_name = 'core_models/home.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
-        return context
-
-
 class CustomLoginView(LoginView):
     template_name = 'core_models/login.html'
     redirect_authenticated_user = True
@@ -45,15 +35,10 @@ class HomeView(TemplateView):
         return context
 
 
-class CustomLoginView(LoginView):
-    template_name = 'core_models/login.html'
-    redirect_authenticated_user = True
-
-
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'core_models/register.html'
-    success_url = reverse_lazy('core:home')  # или на страницу выбора роли
+    success_url = reverse_lazy('core:home')
 
     def form_valid(self, form):
         response = super().form_valid(form)

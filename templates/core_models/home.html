@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Главная — РаботаКГ{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-4">Найдите работу мечты в Кыргызстане</h1>
+        <p class="lead">Более 500 актуальных вакансий от проверенных работодателей</p>
+        
+        <div class="row g-4">
+            {% for vacancy in recent_vacancies %}
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ vacancy.title }}</h5>
+                        <p class="text-muted">{{ vacancy.company.name }}</p>
+                        <p class="card-text">{{ vacancy.description|truncatewords:20 }}</p>
+                        <a href="{% url 'employes:vacancy_detail' vacancy.pk %}" class="btn btn-primary">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>Пока нет вакансий. Создайте первую!</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4>Готовы к работе?</h4>
+                <a href="{% url 'core:register' %}" class="btn btn-success btn-lg">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
