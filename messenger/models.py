@@ -24,6 +24,8 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
+    content = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages', verbose_name='Отправитель')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages',
                                   verbose_name='Получатель')
@@ -35,7 +37,7 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
-        ordering = ('-created_at',)
+        ordering = ['-sent_at']
 
     def __str__(self):
         return f'{self.sender} отправлен {self.recipient}: {self.subject}'

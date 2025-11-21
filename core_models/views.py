@@ -1,14 +1,18 @@
+from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import TemplateView, CreateView
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-# from .forms import CustomUserCreationForm
-from .models import User, Category, Skill, Notification, Review
+from .forms import CustomUserCreationForm
+from .models import Category
+from .models import Skill, Notification, Review
 from .serializers import CategorySerializer, SkillSerializer, NotificationSerializer, ReviewSerializer
 
 
@@ -27,22 +31,60 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
 
-# class RegisterView(CreateView):
-#     form_class = CustomUserCreationForm
-#     template_name = 'core_models/register.html'
-#     success_url = reverse_lazy('core_models:home')
-#
-#     def form_valid(self, form):
-#         response = super().form_valid(form)
-#         login(self.request, self.object)
-#         return response
+class HomeView(TemplateView):
+    template_name = 'core_models/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        try:
+            from employers.models import Vacancy
+            context['recent_vacancies'] = Vacancy.objects.filter(is_active=True)[:8]
+        except:
+            context['recent_vacancies'] = []
+        return context
 
 
-# API Views (DRF)
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+class CustomLoginView(LoginView):
+    template_name = 'core_models/login.html'
+    redirect_authenticated_user = True
+
+
+class RegisterView(CreateView):
+    form_class = CustomUserCreationForm
+    template_name = 'core_models/register.html'
+    success_url = reverse_lazy('core:home')  # или на страницу выбора роли
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        messages.success(self.request, 'Регистрация успешна! Заполните профиль.')
+        # Перенаправляем в зависимости от роли
+        if self.object.role == 'jobseeker':
+            return redirect('jobseekers:profile')
+        elif self.object.role == 'employer':
+            return redirect('employes:company_profile')
+        return response
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'core_models/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        if user.role == 'jobseeker' and hasattr(user, 'jobseeker_profile'):
+            context['profile'] = user.jobseeker_profile
+            context['role_name'] = 'Соискатель'
+        elif user.role == 'employer' and hasattr(user, 'company'):
+            context['profile'] = user.company
+            context['role_name'] = 'Работодатель'
+        else:
+            context['role_name'] = 'Не выбран'
+
+        context['unread_notifications'] = user.notifications.filter(is_read=False).count()
+        return context
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):

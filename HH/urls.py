@@ -8,7 +8,7 @@ urlpatterns = [
     
     path('', include('core_models.urls', namespace='core')),
     path('jobseeker/', include('jobseekers.urls', namespace='jobseekers')),
-    path('employer/', include('employes.urls', namespace='employes')),
+    path('employer/', include('employers.urls', namespace='employes')),
     path('messages/', include('messenger.urls', namespace='messenger')),
     
     path('accounts/', include('django.contrib.auth.urls')),  # logout, password_change и т.д.

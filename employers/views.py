@@ -1,10 +1,10 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from django.urls import reverse_lazy
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
 from core_models.models import Category
 from .models import Company, Vacancy, Application
@@ -12,7 +12,7 @@ from .models import Company, Vacancy, Application
 
 class CompanyProfileView(LoginRequiredMixin, DetailView):
     model = Company
-    template_name = 'employes/company_profile.html'
+    template_name = 'employers/company_profile.html'
     context_object_name = 'company'
 
     def get_object(self):
@@ -23,7 +23,7 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     model = Company
     fields = ['name', 'description', 'logo', 'website', 'address',
               'founded_year', 'employees_count']
-    template_name = 'employes/company_form.html'
+    template_name = 'employers/company_form.html'
     success_url = reverse_lazy('employes:company_profile')
 
     def get_object(self):
@@ -32,7 +32,7 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
 
 class VacancyListView(ListView):
     model = Vacancy
-    template_name = 'employes/vacancy_list.html'
+    template_name = 'employers/vacancy_list.html'
     context_object_name = 'vacancies'
     paginate_by = 12
 
@@ -70,7 +70,7 @@ class VacancyListView(ListView):
 
 class VacancyDetailView(DetailView):
     model = Vacancy
-    template_name = 'employes/vacancy_detail.html'
+    template_name = 'employers/vacancy_detail.html'
     context_object_name = 'vacancy'
 
     def get_context_data(self, **kwargs):
@@ -92,7 +92,7 @@ class VacancyCreateView(LoginRequiredMixin, CreateView):
     model = Vacancy
     fields = ['title', 'description', 'requirements', 'responsibilities',
               'salary_from', 'salary_to', 'location', 'category', 'is_active']
-    template_name = 'employes/vacancy_form.html'
+    template_name = 'employers/vacancy_form.html'
     success_url = reverse_lazy('employes:employer_cabinet')
 
     def form_valid(self, form):
@@ -106,7 +106,7 @@ class VacancyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Vacancy
     fields = ['title', 'description', 'requirements', 'responsibilities',
               'salary_from', 'salary_to', 'location', 'category', 'is_active']
-    template_name = 'employes/vacancy_form.html'
+    template_name = 'employers/vacancy_form.html'
 
     def test_func(self):
         vacancy = self.get_object()
@@ -132,7 +132,7 @@ class VacancyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 class EmployerCabinetView(LoginRequiredMixin, TemplateView):
-    template_name = 'employes/cabinet.html'
+    template_name = 'employers/cabinet.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -153,7 +153,7 @@ class EmployerCabinetView(LoginRequiredMixin, TemplateView):
 
 class VacancyApplicationsView(LoginRequiredMixin, ListView):
     model = Application
-    template_name = 'employes/applications.html'
+    template_name = 'employers/applications.html'
     context_object_name = 'applications'
     paginate_by = 15
 

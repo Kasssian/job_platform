@@ -1,22 +1,29 @@
 from django.urls import path
 from . import views
 
-app_name = 'jobseekers'
+app_name = 'employers'
 
 urlpatterns = [
-    # Профиль соискателя
-    path('profile/', views.JobseekerProfileView.as_view(), name='profile'),
-    path('profile/edit/', views.JobseekerProfileUpdateView.as_view(), name='profile_edit'),
+    # Список и поиск вакансий (общий для всех)
+    path('vacancies/', views.VacancyListView.as_view(), name='vacancy_list'),
+    path('vacancy/<int:pk>/', views.VacancyDetailView.as_view(), name='vacancy_detail'),
 
-    # Образование и опыт
-    path('education/add/', views.EducationCreateView.as_view(), name='education_add'),
-    path('experience/add/', views.ExperienceCreateView.as_view(), name='experience_add'),
+    # Профиль компании
+    path('company/', views.CompanyProfileView.as_view(), name='company_profile'),
+    path('company/edit/', views.CompanyUpdateView.as_view(), name='company_edit'),
 
-    # Личный кабинет
-    path('cabinet/', views.JobseekerCabinetView.as_view(), name='cabinet'),
-    path('applications/', views.MyApplicationsView.as_view(), name='my_applications'),
+    # Управление вакансиями (только для работодателя)
+    path('vacancy/create/', views.VacancyCreateView.as_view(), name='vacancy_create'),
+    path('vacancy/<int:pk>/edit/', views.VacancyUpdateView.as_view(), name='vacancy_edit'),
+    path('vacancy/<int:pk>/delete/', views.VacancyDeleteView.as_view(), name='vacancy_delete'),
+
+    # Личный кабинет работодателя
+    path('cabinet/', views.EmployerCabinetView.as_view(), name='employer_cabinet'),
+    path('applications/', views.VacancyApplicationsView.as_view(), name='applications'),
+    path('applications/vacancy/<int:vacancy_id>/', views.VacancyApplicationsView.as_view(),
+         name='applications_by_vacancy'),
 
     # HTMX действия
-    path('htmx/add-skill/', views.htmx_add_skill, name='htmx_add_skill'),
-    path('htmx/apply/<int:vacancy_id>/', views.htmx_apply_vacancy, name='htmx_apply_vacancy'),
+    path('htmx/application/<int:application_id>/status/', views.htmx_update_application_status,
+         name='htmx_update_status'),
 ]

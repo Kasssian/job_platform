@@ -27,6 +27,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Application definition
+# settings.py
+
+AUTH_USER_MODEL = 'core_models.User'
 
 INSTALLED_APPS = [
     'daphne',
