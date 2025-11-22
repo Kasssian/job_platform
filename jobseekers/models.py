@@ -74,3 +74,4 @@ class JobseekerSkill(models.Model):
     class Meta:
         unique_together = ('profile', 'skill')
         verbose_name = 'Навык соискателя'
+        verbose_name_plural = 'Навыки соискателей'
