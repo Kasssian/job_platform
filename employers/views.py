@@ -24,7 +24,7 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     fields = ['name', 'description', 'logo', 'website', 'address',
               'founded_year', 'employees_count']
     template_name = 'employers/company_form.html'
-    success_url = reverse_lazy('employes:company_profile')
+    success_url = reverse_lazy('employers:company_profile')
 
     def get_object(self):
         return get_object_or_404(Company, user=self.request.user)
@@ -90,10 +90,10 @@ class VacancyDetailView(DetailView):
 
 class VacancyCreateView(LoginRequiredMixin, CreateView):
     model = Vacancy
-    fields = ['title', 'description', 'requirements', 'responsibilities',
+    fields = ['title', 'description', 'requirements', 'responsibilities', 'skills',
               'salary_from', 'salary_to', 'location', 'category', 'is_active']
     template_name = 'employers/vacancy_form.html'
-    success_url = reverse_lazy('employes:employer_cabinet')
+    success_url = reverse_lazy('employers:employer_cabinet')
 
     def form_valid(self, form):
         company = get_object_or_404(Company, user=self.request.user)
@@ -104,7 +104,7 @@ class VacancyCreateView(LoginRequiredMixin, CreateView):
 
 class VacancyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Vacancy
-    fields = ['title', 'description', 'requirements', 'responsibilities',
+    fields = ['title', 'description', 'requirements', 'responsibilities', 'skills',
               'salary_from', 'salary_to', 'location', 'category', 'is_active']
     template_name = 'employers/vacancy_form.html'
 
@@ -114,12 +114,12 @@ class VacancyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 self.request.user.is_staff)
 
     def get_success_url(self):
-        return reverse_lazy('employes:vacancy_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy('employers:vacancy_detail', kwargs={'pk': self.object.pk})
 
 
 class VacancyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Vacancy
-    success_url = reverse_lazy('employes:employer_cabinet')
+    success_url = reverse_lazy('employers:employer_cabinet')
 
     def test_func(self):
         vacancy = self.get_object()

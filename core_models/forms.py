@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+
 from .models import User
 
 
@@ -22,5 +23,5 @@ class CustomUserCreationForm(UserCreationForm):
             'phone': 'Телефон',
         }
         widgets = {
-            'phone': forms.TextInput(attrs={'placeholder': '+7 (___) ___-__-__'}),
+            'phone': forms.TextInput(attrs={'placeholder': '+996 (___) __-__-__'}),
         }

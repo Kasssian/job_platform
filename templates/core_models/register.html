@@ -13,12 +13,14 @@
             min-height: 100vh;
             font-family: 'Segoe UI', sans-serif;
         }
+
         .card {
             border: none;
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
             background: white;
         }
+
         .form-control, select.form-select {
             height: 56px;
             border-radius: 16px;
@@ -26,16 +28,19 @@
             background-color: #f8f9fa;
             padding: 0 16px;
         }
+
         .form-control:focus, select.form-select:focus {
             border-color: #6e8efb;
             box-shadow: 0 0 0 4px rgba(110, 142, 251, 0.2);
             background-color: #fff;
         }
+
         select.form-select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%236e8efb' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath d='M8 11l-5-5h10l-5 5z'/%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 16px center;
         }
+
         .btn-success {
             height: 56px;
             border-radius: 16px;
@@ -65,9 +70,14 @@
                         <label class="form-label fw-semibold">Я регистрируюсь как:</label>
                         <select name="role" class="form-select form-select-lg" required>
                             <option value="" disabled selected>Выберите роль</option>
-                            <option value="jobseeker" {% if form.role.value == "jobseeker" %}selected{% endif %}>Соискатель</option>
-                            <option value="employer" {% if form.role.value == "employer" %}selected{% endif %}>Работодатель</option>
-                            <option value="admin" {% if form.role.value == "admin" %}selected{% endif %}>Администратор</option>
+                            <option value="jobseeker" {% if form.role.value == "jobseeker" %}selected{% endif %}>
+                                Соискатель
+                            </option>
+                            <option value="employer" {% if form.role.value == "employer" %}selected{% endif %}>
+                                Работодатель
+                            </option>
+                            <option value="admin" {% if form.role.value == "admin" %}selected{% endif %}>Администратор
+                            </option>
                         </select>
                         {% if form.role.errors %}
                             <div class="text-danger small mt-1">{{ form.role.errors|join:" " }}</div>
