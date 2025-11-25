@@ -1,29 +1,36 @@
+# employers/urls.py
+
 from django.urls import path
 from . import views
+from .views import VacancyDeleteView  # оставляем, если используешь
 
 app_name = 'employers'
 
 urlpatterns = [
-    # Список и поиск вакансий (общий для всех)
-    path('vacancies/', views.VacancyListView.as_view(), name='vacancy_list'),
-    path('vacancy/<int:pk>/', views.VacancyDetailView.as_view(), name='vacancy_detail'),
+    # ────── ПУБЛИЧНЫЕ СТРАНИЦЫ (доступны всем) ──────
+    path('vacancies/', views.AllVacanciesView.as_view(), name='all_vacancies'),  # ← Все вакансии + фильтры
+    path('companies/', views.AllCompaniesView.as_view(), name='all_companies'),  # ← Все компании + поиск
 
-    # Профиль компании
-    path('company/', views.CompanyProfileView.as_view(), name='company_profile'),
+    # ────── ДЕТАЛЬНЫЕ СТРАНИЦЫ ──────
+    path('vacancy/<int:pk>/', views.VacancyDetailView.as_view(), name='vacancy_detail'),
+    path('company/<int:company_id>/', views.CompanyProfileView.as_view(), name='company_profile'),
+
+    # ────── ДЛЯ РАБОТОДАТЕЛЕЙ (личный кабинет) ──────
+    path('cabinet/', views.EmployerCabinetView.as_view(), name='employer_cabinet'),
     path('company/edit/', views.CompanyUpdateView.as_view(), name='company_edit'),
 
-    # Управление вакансиями (только для работодателя)
+    # Управление вакансиями
     path('vacancy/create/', views.VacancyCreateView.as_view(), name='vacancy_create'),
     path('vacancy/<int:pk>/edit/', views.VacancyUpdateView.as_view(), name='vacancy_edit'),
-    path('vacancy/<int:pk>/delete/', views.VacancyDeleteView.as_view(), name='vacancy_delete'),
+    path('vacancy/<int:pk>/delete/', VacancyDeleteView.as_view(), name='vacancy_delete'),  # или views.VacancyDeleteView
 
-    # Личный кабинет работодателя
-    path('cabinet/', views.EmployerCabinetView.as_view(), name='employer_cabinet'),
+    # Отклики
     path('applications/', views.VacancyApplicationsView.as_view(), name='applications'),
     path('applications/vacancy/<int:vacancy_id>/', views.VacancyApplicationsView.as_view(),
          name='applications_by_vacancy'),
 
-    # HTMX действия
-    path('htmx/application/<int:application_id>/status/', views.htmx_update_application_status,
-         name='htmx_update_status'),
+    path('applications/update/<int:application_id>/',
+         views.update_application_status,
+         name='update_application_status'),
+    path('invite/<str:username>/', views.invite_jobseeker, name='invite_jobseeker'),
 ]

@@ -1,0 +1,42 @@
+<div class="border-bottom pb-3 mb-3" hx-target="this" hx-swap="outerHTML">
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+            <h6 class="fw-bold">
+                <a href="{% url 'jobseekers:resume_detail' application.jobseeker.user.username %}"
+                   class="text-decoration-none text-primary">
+                    {{ application.jobseeker.user.get_full_name|default:application.jobseeker.user.username }}
+                </a>
+                → {{ application.vacancy.title }}
+            </h6>
+            <p class="text-muted small mb-2">
+                Откликнулся: {{ application.applied_at|date:"d.m.Y в H:i" }}
+                {% if application.cover_letter %}
+                    <br><em>{{ application.cover_letter|truncatewords:30 }}</em>
+                {% endif %}
+            </p>
+        </div>
+
+        <form hx-post="{% url 'employers:htmx_update_status' application.id %}"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+            <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                <option value="sent"      {% if application.status == 'sent' %}selected{% endif %}>Отправлено</option>
+                <option value="viewed"    {% if application.status == 'viewed' %}selected{% endif %}>Просмотрено</option>
+                <option value="interview" {% if application.status == 'interview' %}selected{% endif %}>Приглашён</option>
+                <option value="rejected"  {% if application.status == 'rejected' %}selected{% endif %}>Отказано</option>
+                <option value="hired"     {% if application.status == 'hired' %}selected{% endif %}>Принят</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Добавим визуальную метку статуса -->
+    <div class="mt-2">
+        <span class="badge
+            {% if application.status == 'viewed' %}bg-info
+            {% elif application.status == 'interview' %}bg-success
+            {% elif application.status == 'rejected' %}bg-danger
+            {% elif application.status == 'hired' %}bg-primary
+            {% else %}bg-secondary{% endif %}">
+            {{ application.get_status_display }}
+        </span>
+    </div>
+</div>

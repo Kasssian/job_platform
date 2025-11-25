@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Пригласить соискателя{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Пригласить на вакансию</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <h5 class="fw-bold">{{ jobseeker.user.get_full_name }}</h5>
+                        <p class="text-muted">{{ jobseeker.desired_position|default:"Должность не указана" }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Выберите вакансию:</label>
+                            <select name="vacancy" class="form-select form-select-lg" required>
+                                <option value="">— Выберите вакансию —</option>
+                                {% for v in vacancies %}
+                                    <option value="{{ v.id }}">{{ v.title }} ({{ v.location }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-success btn-lg">Отправить приглашение</button>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary">← Назад</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

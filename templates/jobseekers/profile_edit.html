@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}   <!-- ЭТА СТРОКА ОБЯЗАТЕЛЬНА! -->
+
+{% block title %}Редактировать резюме — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Редактировать резюме</h4>
+                    <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-sm">
+                        Назад
+                    </button>
+                </div>
+                <div class="card-body">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Желаемая должность *</label>
+                            {{ form.desired_position|add_class:"form-control form-control-lg" }}
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Зарплата от</label>
+                                <div class="input-group">
+                                    {{ form.desired_salary_from|add_class:"form-control"|attr:"placeholder:40000" }}
+                                    <span class="input-group-text">сом</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Зарплата до</label>
+                                <div class="input-group">
+                                    {{ form.desired_salary_to|add_class:"form-control"|attr:"placeholder:100000" }}
+                                    <span class="input-group-text">сом</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="my-4">
+                            <label class="form-label fw-bold">Опыт работы (лет)</label>
+                            {{ form.experience_years|add_class:"form-control" }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">О себе</label>
+                            {{ form.about|add_class:"form-control"|attr:"rows:6" }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Телефон</label>
+                            {{ form.phone_number|add_class:"form-control" }}
+                        </div>
+
+                        <div class="form-check mb-5">
+                            {{ form.is_open_to_work|add_class:"form-check-input" }}
+                            <label class="form-check-label fw-bold">
+                                Ищу работу — резюме видно работодателям
+                            </label>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="button" onclick="history.back()" class="btn btn-secondary px-4">
+                                Отмена
+                            </button>
+                            <button type="submit" class="btn btn-success px-5 ms-3">
+                                Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

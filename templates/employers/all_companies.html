@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Компании — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="fw-bold mb-5 text-center">Компании на Работа.kg</h1>
+
+    <!-- ПОИСК -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Название компании..."
+                       value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for company in companies %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'employers:company_profile' company.id %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm text-center p-4 hover-shadow">
+                    {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="rounded mb-3" style="width: 100px; height: 100px; object-fit: contain;">
+                    {% else %}
+                        <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center mb-3" style="width:100px;height:100px;margin:0 auto;font-size:2rem;">
+                            {{ company.name|first|upper }}
+                        </div>
+                    {% endif %}
+                    <h5 class="fw-bold text-dark mt-2">{{ company.name }}</h5>
+                    <p class="text-success small">
+                        {{ company.active_vacancies_count }} активных вакансий
+                    </p>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">Компании не найдены</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

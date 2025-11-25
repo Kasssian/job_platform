@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Вакансии — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="fw-bold mb-4">Поиск вакансий</h1>
+
+    <!-- ФИЛЬТРЫ -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Должность или компания"
+                           value="{{ request.GET.q|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="salary_from" class="form-control" placeholder="Зарплата от (сом)"
+                           value="{{ request.GET.salary_from|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="duties" class="form-control" placeholder="Ключевые слова в обязанностях"
+                           value="{{ request.GET.duties|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Найти</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'employers:all_vacancies' %}" class="btn btn-outline-secondary w-100">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ВАКАНСИИ -->
+    <div class="row g-4">
+        {% for vacancy in vacancies %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="fw-bold mb-2">
+                        <a href="{% url 'employers:vacancy_detail' vacancy.pk %}"
+                           class="text-dark text-decoration-none stretched-link">
+                            {{ vacancy.title }}
+                        </a>
+                    </h5>
+                    <p class="text-primary fw-semibold mb-1">{{ vacancy.company.name }}</p>
+                    <p class="text-muted small mb-3">
+                        {{ vacancy.location }}
+                        {% if vacancy.salary_from %}
+                            <br>от {{ vacancy.salary_from|floatformat:0 }} сом
+                        {% endif %}
+                    </p>
+                    <p class="text-muted flex-grow-1">{{ vacancy.description|truncatewords:18 }}</p>
+
+                    <!-- ДВЕ НЕЗАВИСИМЫЕ КНОПКИ — ГАРАНТИРОВАННО РАБОТАЕТ -->
+                    <div class="mt-4 d-flex gap-2">
+                        <!-- КНОПКА "ПОДРОБНЕЕ" -->
+                        <a href="{% url 'employers:vacancy_detail' vacancy.pk %}"
+                           class="btn btn-outline-primary flex-fill">
+                            Подробнее
+                        </a>
+
+                        <!-- КНОПКА "ОТКЛИКНУТЬСЯ" — САМООБНОВЛЯЮЩАЯСЯ -->
+                        {% if user.is_authenticated and user.role == 'jobseeker' %}
+                            {% if vacancy.already_applied or vacancy.id in applied_vacancy_ids %}
+                                <button class="btn btn-secondary flex-fill" disabled>
+                                    Отклик отправлен
+                                </button>
+                            {% else %}
+                                <form method="post" action="{% url 'jobseekers:apply_vacancy' vacancy.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success flex-fill">
+                                        Откликнуться
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% elif user.is_authenticated and user.role == 'employer' and vacancy.company.user == user %}
+                            <small class="text-muted d-block w-100 text-center mt-2">Это ваша вакансия</small>
+                        {% else %}
+                            <a href="{% url 'core:login' %}?next={{ request.path }}"
+                               class="btn btn-outline-primary flex-fill">
+                                Войти
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-footer bg-transparent text-muted small text-end">
+                    {{ vacancy.created_at|date:"d.m.Y" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">Вакансии не найдены</h4>
+            <a href="{% url 'employers:all_vacancies' %}" class="btn btn-outline-primary mt-3">
+                Показать все вакансии
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

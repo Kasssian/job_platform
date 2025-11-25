@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Добавить образование — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Добавить образование</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Показываем ошибки (если будут) -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger mb-4">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <small><strong>{{ field.label }}:</strong> {{ error }}</small><br>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Учебное заведение *</label>
+                            {{ form.institution|add_class:"form-control"|attr:"required" }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Факультет</label>
+                            {{ form.faculty|add_class:"form-control" }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Специальность *</label>
+                            {{ form.specialty|add_class:"form-control"|attr:"required" }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Степень</label>
+                            {{ form.degree|add_class:"form-control" }}
+                        </div>
+
+                        <!-- КРАСИВЫЙ КАЛЕНДАРЬ + АВТОМАТИЧЕСКОЕ ИЗВЛЕЧЕНИЕ ГОДА -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Год начала *</label>
+                                <input type="date" class="form-control" id="id_start_year_date" required>
+                                <input type="hidden" name="start_year" id="id_start_year">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Год окончания</label>
+                                <input type="date" class="form-control" id="id_end_year_date">
+                                <input type="hidden" name="end_year" id="id_end_year">
+                                <small class="text-muted">Оставьте пустым, если учитесь сейчас</small>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            {{ form.is_current|add_class:"form-check-input" }}
+                            <label class="form-check-label fw-bold">Учусь в настоящее время</label>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-secondary px-4">Отмена</a>
+                            <button type="submit" class="btn btn-success px-5 ms-2">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const startDateInput = document.getElementById('id_start_year_date');
+    const endDateInput = document.getElementById('id_end_year_date');
+    const startYearHidden = document.getElementById('id_start_year');
+    const endYearHidden = document.getElementById('id_end_year');
+    const isCurrent = document.querySelector('[name="is_current"]');
+
+    // Преобразуем дату → год
+    function updateHiddenFields() {
+        if (startDateInput.value) {
+            startYearHidden.value = new Date(startDateInput.value).getFullYear();
+        }
+        if (endDateInput.value) {
+            endYearHidden.value = new Date(endDateInput.value).getFullYear();
+        } else {
+            endYearHidden.value = '';
+        }
+    }
+
+    // При выборе даты — записываем год в скрытое поле
+    startDateInput.addEventListener('change', updateHiddenFields);
+    endDateInput.addEventListener('change', updateHiddenFields);
+
+    // Если "Учусь сейчас" — очищаем и блокируем окончание
+    function toggleEndDate() {
+        if (isCurrent.checked) {
+            endDateInput.value = '';
+            endDateInput.disabled = true;
+            endYearHidden.value = '';
+        } else {
+            endDateInput.disabled = false;
+        }
+        updateHiddenFields();
+    }
+
+    if (isCurrent) {
+        isCurrent.addEventListener('change', toggleEndDate);
+        toggleEndDate(); // при загрузке
+    }
+
+    // При отправке формы — гарантируем, что год записан
+    document.querySelector('form').addEventListener('submit', updateHiddenFields);
+});
+</script>
+{% endblock %}

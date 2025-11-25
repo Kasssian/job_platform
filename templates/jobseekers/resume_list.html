@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Резюме соискателей — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="fw-bold mb-4">Поиск резюме</h1>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Имя, должность, навык"
+                           value="{{ request.GET.q|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="salary_from" class="form-control" placeholder="Зарплата от (сом)"
+                           value="{{ request.GET.salary_from|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="skill" class="form-select">
+                        <option value="">Любой навык</option>
+                        {% for skill in skills %}
+                            <option value="{{ skill.id }}" {% if request.GET.skill == skill.id|stringformat:"s" %}selected{% endif %}>
+                                {{ skill.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Найти</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'jobseekers:resume_list' %}" class="btn btn-outline-secondary w-100">Сбросить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for profile in profiles %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-start mb-3">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" class="rounded-circle me-3"
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 60px; height: 60px;">
+                                {{ profile.user.get_full_name|first|upper|default:profile.user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                <a href="{% url 'jobseekers:resume_detail' profile.user.username %}"
+                                   class="text-dark text-decoration-none">
+                                    {{ profile.user.get_full_name|default:profile.user.username }}
+                                </a>
+                            </h5>
+                            <p class="text-primary mb-0">{{ profile.desired_position|default:"Должность не указана" }}</p>
+                        </div>
+                    </div>
+
+                    <p class="text-muted small">
+                        {% if profile.desired_salary_from %}от {{ profile.desired_salary_from|floatformat:0 }} сом{% endif %}
+                        {% if profile.experience_years > 0 %} • {{ profile.experience_years }} лет опыта{% endif %}
+                    </p>
+
+                    {% if profile.skills.exists %}
+                    <div class="mt-2">
+                        {% for js in profile.skills.all|slice:":3" %}
+                            <span class="badge bg-light text-dark small me-1">{{ js.skill.name }}</span>
+                        {% endfor %}
+                        {% if profile.skills.count > 3 %}<span class="text-muted small">+{{ profile.skills.count|add:"-3" }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-auto pt-3">
+                        <a href="{% url 'jobseekers:resume_detail' profile.user.username %}"
+                           class="btn btn-outline-primary btn-sm w-100 mb-2">
+                            Посмотреть резюме
+                        </a>
+
+                        {% if user.is_authenticated and user.role == 'employer' and user.company %}
+                        <a href="{% url 'employers:invite_jobseeker' profile.user.username %}"
+                           class="btn btn-success btn-sm w-100">
+                            Пригласить
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-muted small text-end">
+                    {{ profile.updated_at|date:"d.m.Y" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">Резюме не найдены</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

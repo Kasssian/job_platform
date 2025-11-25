@@ -1,37 +1,107 @@
 {% extends "base.html" %}
-{% block title %}Главная — РаботаКГ{% endblock %}
+{% load static %}
+
+{% block title %}Главная — Работа.kg{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8">
-        <h1 class="mb-4">Найдите работу мечты в Кыргызстане</h1>
-        <p class="lead">Более 500 актуальных вакансий от проверенных работодателей</p>
-        
-        <div class="row g-4">
-            {% for vacancy in recent_vacancies %}
-            <div class="col-md-6">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ vacancy.title }}</h5>
-                        <p class="text-muted">{{ vacancy.company.name }}</p>
-                        <p class="card-text">{{ vacancy.description|truncatewords:20 }}</p>
-                        <a href="{% url 'employes:vacancy_detail' vacancy.pk %}" class="btn btn-primary">Подробнее</a>
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-4 fw-bold">Найдите работу мечты или идеального сотрудника</h1>
+                    <p class="lead mb-4">Более 10 000 актуальных вакансий и резюме в Кыргызстане</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#" class="btn btn-light btn-lg">Я ищу работу</a>
+                        <a href="#" class="btn btn-outline-light btn-lg">Я работодатель</a>
                     </div>
                 </div>
+                <div class="col-lg-5 text-center mt-4 mt-lg-0">
+                    <img src="{% static 'img/hero-illustration.svg' %}" alt="Поиск работы" class="img-fluid"
+                         style="max-width: 380px;">
+                </div>
             </div>
-            {% empty %}
-            <p>Пока нет вакансий. Создайте первую!</p>
-            {% endfor %}
         </div>
-    </div>
+    </section>
 
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <h4>Готовы к работе?</h4>
-                <a href="{% url 'core:register' %}" class="btn btn-success btn-lg">Зарегистрироваться</a>
+    <!-- Categories -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5 fw-bold">Популярные категории</h2>
+            <div class="row g-4">
+                {% for category in categories %}
+                    <div class="col-md-3 col-6">
+                        <a href="#" class="text-decoration-none">
+                            <div class="text-center p-4 bg-white rounded-3 shadow-sm vacancy-card">
+                                <i class="fas fa-laptop-code fa-3x text-primary mb-3"></i>
+                                <h6 class="fw-semibold">{{ category.name }}</h6>
+                            </div>
+                        </a>
+                    </div>
+                {% empty %}
+                    <p class="text-center text-muted">Категории пока не добавлены.</p>
+                {% endfor %}
             </div>
         </div>
-    </div>
-</div>
+    </section>
+
+    <!-- Recent Vacancies -->
+    {% if recent_vacancies %}
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">Свежие вакансии</h2>
+                    <a href="#" class="btn btn-outline-primary">Все вакансии →</a>
+                </div>
+                <div class="row g-4">
+                    {% for vacancy in recent_vacancies %}
+                        <div class="col-lg-6">
+                            <div class="card h-100 shadow-sm vacancy-card border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">{{ vacancy.title }}</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-building"></i> {{ vacancy.company.name }}
+                                    </p>
+                                    <p class="text-muted mb-3">
+                                        <i class="fas fa-map-marker-alt"></i> {{ vacancy.location }}
+                                        {% if vacancy.salary_from %}
+                                            • {{ vacancy.salary_from|floatformat:0 }} —
+                                            {% if vacancy.salary_to %}{{ vacancy.salary_to|floatformat:0 }}{% else %}
+                                                договорная{% endif %} сом
+                                        {% endif %}
+                                    </p>
+                                    <p class="card-text text-truncate-3">{{ vacancy.description|truncatewords:30 }}</p>
+                                    <a href="#" class="btn btn-primary mt-2">Подробнее</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Stats -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h3 class="display-5 fw-bold">10,000+</h3>
+                    <p>Активных вакансий</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="display-5 fw-bold">5,000+</h3>
+                    <p>Соискателей</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="display-5 fw-bold">500+</h3>
+                    <p>Компаний</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="display-5 fw-bold">98%</h3>
+                    <p>Довольных пользователей</p>
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}

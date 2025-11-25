@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ vacancy.title }} — Вакансия{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h2 class="fw-bold">{{ vacancy.title }}</h2>
+                            <p class="text-muted fs-5">
+                                {{ vacancy.company.name }} • {{ vacancy.location }}
+                            </p>
+                        </div>
+                        <span class="badge bg-{% if vacancy.is_active %}success{% else %}secondary{% endif %} fs-6">
+                            {% if vacancy.is_active %}Активна{% else %}Закрыта{% endif %}
+                        </span>
+                    </div>
+
+                    {% if vacancy.salary_from or vacancy.salary_to %}
+                        <div class="alert alert-success">
+                            <strong>Зарплата:</strong>
+                            {% if vacancy.salary_from %}от {{ vacancy.salary_from|floatformat:0 }} сом{% endif %}
+                            {% if vacancy.salary_to %} до {{ vacancy.salary_to|floatformat:0 }} сом{% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <p><strong>Категория:</strong> {{ vacancy.category }}</p>
+                            <p><strong>Дата публикации:</strong> {{ vacancy.created_at|date:"d.m.Y" }}</p>
+                            <p><strong>Откликов:</strong> <span class="badge bg-primary">{{ applications_count }}</span></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h5>Описание</h5>
+                    <p class="lead">{{ vacancy.description|linebreaks }}</p>
+
+                    <h5 class="mt-4">Требования</h5>
+                    <p>{{ vacancy.requirements|linebreaks }}</p>
+
+                    {% if vacancy.responsibilities %}
+                        <h5 class="mt-4">Обязанности</h5>
+                        <p>{{ vacancy.responsibilities|linebreaks }}</p>
+                    {% endif %}
+
+                    <!-- БОЛЬШАЯ КНОПКА ОТКЛИКА -->
+                    {% if user.is_authenticated and user.role == 'jobseeker' %}
+                        <div class="text-center mt-5 py-5 border-top">
+                            {% if vacancy.already_applied %}
+                                <div class="alert alert-info fs-4">
+                                    Вы уже откликнулись на эту вакансию
+                                </div>
+                            {% else %}
+                                <form method="post" action="{% url 'jobseekers:apply_vacancy' vacancy.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-lg px-5 py-3 fs-5">
+                                        Откликнуться на вакансию
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- КНОПКИ ДЛЯ РАБОТОДАТЕЛЯ -->
+                    {% if user.is_authenticated and vacancy.company.user == user %}
+                        <div class="mt-5 text-end border-top pt-4">
+                            <a href="{% url 'employers:vacancy_edit' vacancy.pk %}" class="btn btn-primary">
+                                Редактировать
+                            </a>
+                            <a href="{% url 'employers:vacancy_delete' vacancy.pk %}"
+                               class="btn btn-outline-danger ms-2"
+                               onclick="return confirm('Удалить вакансию?');">
+                                Удалить
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">
+                            ← Назад
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

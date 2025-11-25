@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Отклики на вакансии{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Отклики на вакансии ({{ applications.count }})</h2>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            {% for application in applications %}
+                <div class="border-bottom pb-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">
+                                <a href="{% url 'jobseekers:resume_detail' application.jobseeker.user.username %}"
+                                   class="text-decoration-none text-primary">
+                                    {{ application.jobseeker.user.get_full_name|default:application.jobseeker.user.username }}
+                                </a>
+                                → {{ application.vacancy.title }}
+                            </h6>
+                            <p class="text-muted small mb-2">
+                                Откликнулся: {{ application.applied_at|date:"d.m.Y в H:i" }}
+                                {% if application.cover_letter %}
+                                    <br><em>{{ application.cover_letter|truncatewords:30 }}</em>
+                                {% endif %}
+                            </p>
+
+                            <!-- Текущий статус -->
+                            <span class="badge
+                                {% if application.status == 'viewed' %}bg-info
+                                {% elif application.status == 'interview' %}bg-success
+                                {% elif application.status == 'rejected' %}bg-danger
+                                {% elif application.status == 'hired' %}bg-primary
+                                {% else %}bg-secondary{% endif %} fs-6">
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+
+                        <!-- ПРОСТАЯ ФОРМА — КАК В КАБИНЕТЕ СОИСКАТЕЛЯ -->
+                        <div class="text-end">
+                            <form method="post" action="{% url 'employers:update_application_status' application.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="sent"      {% if application.status == 'sent' %}selected{% endif %}>Отправлено</option>
+                                    <option value="viewed"    {% if application.status == 'viewed' %}selected{% endif %}>Просмотрено</option>
+                                    <option value="interview" {% if application.status == 'interview' %}selected{% endif %}>Приглашён</option>
+                                    <option value="rejected"  {% if application.status == 'rejected' %}selected{% endif %}>Отказано</option>
+                                    <option value="hired"     {% if application.status == 'hired' %}selected{% endif %}>Принят</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted text-center py-5">Пока нет откликов на ваши вакансии</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

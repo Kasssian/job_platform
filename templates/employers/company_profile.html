@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ company.name }} — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Левая колонка — компания -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-5">
+                    {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="img-fluid rounded" style="max-height: 150px;">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:150px; width:150px; margin:0 auto;">
+                            <h3 class="text-muted">{{ company.name|slice:":2"|upper }}</h3>
+                        </div>
+                    {% endif %}
+                    <h3 class="mt-4 fw-bold">{{ company.name }}</h3>
+                    {% if company.website %}
+                        <a href="{{ company.website }}" target="_blank" class="text-decoration-none text-primary">
+                            {{ company.website|urlize }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка — вакансии -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">О компании</h4>
+                    <p class="lead">{{ company.description|default:"Информация о компании скоро появится."|linebreaks }}</p>
+                </div>
+            </div>
+
+            <h4 class="mb-4">Открытые вакансии ({{ active_vacancies|length }})</h4>
+            <div class="row g-4">
+                {% for vacancy in active_vacancies %}
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="{% url 'employers:vacancy_detail' vacancy.pk %}" class="text-dark text-decoration-none">
+                                    {{ vacancy.title }}
+                                </a>
+                            </h5>
+                            <p class="text-muted small">
+                                {{ vacancy.location }}
+                                {% if vacancy.salary_from %} • от {{ vacancy.salary_from|floatformat:0 }} сом{% endif %}
+                            </p>
+                            <p class="card-text text-muted">{{ vacancy.description|truncatewords:25 }}</p>
+
+                            <!-- ДВЕ НЕЗАВИСИМЫЕ КНОПКИ -->
+                            <div class="mt-auto d-flex gap-2">
+                                <a href="{% url 'employers:vacancy_detail' vacancy.pk %}"
+                                   class="btn btn-outline-primary flex-fill">
+                                    Подробнее
+                                </a>
+
+                                {% if user.is_authenticated and user.role == 'jobseeker' %}
+                                    {% if vacancy.already_applied %}
+                                        <button class="btn btn-secondary flex-fill" disabled>
+                                            Отклик отправлен
+                                        </button>
+                                    {% else %}
+                                        <form method="post" action="{% url 'jobseekers:apply_vacancy' vacancy.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success flex-fill">
+                                                Откликнуться
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-5">Пока нет активных вакансий</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,6 +10,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from employers.models import Application
+from jobseekers.models import JobseekerProfile
 from .forms import CustomUserCreationForm
 from .models import Category
 from .models import Skill, Notification, Review
@@ -46,9 +48,18 @@ class RegisterView(CreateView):
         messages.success(self.request, 'Регистрация успешна! Заполните профиль.')
         # Перенаправляем в зависимости от роли
         if self.object.role == 'jobseeker':
-            return redirect('jobseekers:profile')
+            JobseekerProfile.objects.get_or_create(
+                user=self.object,
+                defaults={
+                    'desired_position': '',
+                    'phone_number': '+996',  # можно оставить пустым, если поле позволяет
+                    'is_open_to_work': True,
+                }
+            )
+            messages.info(self.request, 'Ваше резюме создано. Заполните его, чтобы начать поиск работы!')
+            return redirect('core:dashboard')
         elif self.object.role == 'employer':
-            return redirect('employers:company_profile')
+            return redirect('core:dashboard')
         return response
 
 
@@ -59,16 +70,33 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        if user.role == 'jobseeker' and hasattr(user, 'jobseeker_profile'):
-            context['profile'] = user.jobseeker_profile
-            context['role_name'] = 'Соискатель'
-        elif user.role == 'employer' and hasattr(user, 'company'):
-            context['profile'] = user.company
-            context['role_name'] = 'Работодатель'
-        else:
-            context['role_name'] = 'Не выбран'
+        # Название роли
+        context['role_name'] = dict(user.ROLE_CHOICES).get(user.role, user.role.capitalize())
 
-        context['unread_notifications'] = user.notifications.filter(is_read=False).count()
+        # Для соискателя
+        if user.role == 'jobseeker':
+            try:
+                profile = user.jobseeker_profile
+                context['profile'] = profile
+
+                # Новые отклики (со статусом 'sent')
+                context['new_responses_count'] = Application.objects.filter(
+                    jobseeker=profile,
+                    status='sent'
+                ).count()
+            except:
+                context['new_responses_count'] = 0
+
+        # Для работодателя
+        elif user.role == 'employer':
+            if hasattr(user, 'company') and user.company:
+                context['new_applications'] = Application.objects.filter(
+                    vacancy__company=user.company,
+                    status='sent'
+                ).count()
+            else:
+                context['new_applications'] = 0
+
         return context
 
 

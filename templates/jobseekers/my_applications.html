@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Мои отклики — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Мои отклики</h2>
+
+    {% if applications %}
+    <div class="row g-4">
+        {% for app in applications %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">
+                        <a href="{% url 'employers:vacancy_detail' app.vacancy.pk %}">
+                            {{ app.vacancy.title }}
+                        </a>
+                    </h5>
+                    <p class="text-primary mb-1">{{ app.vacancy.company.name }}</p>
+                    <p class="text-muted small mb-2">
+                        Отклик отправлен: {{ app.applied_at|date:"d.m.Y в H:i" }}
+                    </p>
+                    <span class="badge 
+                        {% if app.status == 'sent' %}bg-warning
+                        {% elif app.status == 'viewed' %}bg-info
+                        {% elif app.status == 'accepted' %}bg-success
+                        {% elif app.status == 'rejected' %}bg-danger
+                        {% endif %}">
+                        {{ app.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-paper-plane fa-5x text-muted mb-4"></i>
+        <h4 class="text-muted">Вы ещё не откликались на вакансии</h4>
+        <a href="{% url 'employers:all_vacancies' %}" class="btn btn-success mt-3">
+            Найти вакансии
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

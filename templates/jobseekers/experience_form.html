@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Добавить опыт работы — Работа.kg{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Добавить опыт работы</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Показываем ошибки формы -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Компания *</label>
+                            {{ form.company|add_class:"form-control"|attr:"required" }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Должность *</label>
+                            {{ form.position|add_class:"form-control"|attr:"required" }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Описание обязанностей</label>
+                            {{ form.description|add_class:"form-control"|attr:"rows:5" }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Дата начала *</label>
+                                {{ form.start_date|add_class:"form-control"|attr:"type:date"|attr:"required" }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Дата окончания</label>
+                                {{ form.end_date|add_class:"form-control"|attr:"type:date" }}
+                                <small class="text-muted">Оставьте пустым, если работаете сейчас</small>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            {{ form.is_current|add_class:"form-check-input" }}
+                            <label class="form-check-label fw-bold">Работаю в настоящее время</label>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-secondary px-4">Отмена</a>
+                            <button type="submit" class="btn btn-success px-5 ms-2">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

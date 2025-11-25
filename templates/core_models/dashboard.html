@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Личный кабинет — Работа.kg{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
+                    <div class="card-body text-center py-4">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" width="120"
+                                 height="120">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3"
+                                 style="width:120px;height:120px;font-size:3rem;">
+                                {{ user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <h5 class="fw-bold">{{ user.get_full_name|default:user.username }}</h5>
+                        <p class="text-muted mb-1">
+                            {{ role_name }}
+                        </p>
+                        <p class="text-muted small">{{ user.email }}</p>
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'core:dashboard' %}" class="list-group-item list-group-item-action active">
+                            Обзор
+                        </a>
+
+                        {% if user.role == 'jobseeker' %}
+                            <a href="{% url 'jobseekers:cabinet' %}" class="list-group-item list-group-item-action">
+                                Моё резюме
+                            </a>
+                            <a href="{% url 'employers:all_vacancies' %}"
+                               class="list-group-item list-group-item-action">
+                                Поиск вакансий
+                            </a>
+                            <a href="{% url 'jobseekers:my_applications' %}"
+                               class="list-group-item list-group-item-action">
+                                Мои отклики
+                                {% if new_responses_count > 0 %}
+                                    <span class="badge bg-danger float-end">{{ new_responses_count }}</span>
+                                {% endif %}
+                            </a>
+                        {% elif user.role == 'employer' %}
+                            {% if user.company %}
+                                <a href="{% url 'employers:employer_cabinet' %}"
+                                   class="list-group-item list-group-item-action">
+                                    Профиль компании
+                                </a>
+                                <a href="{% url 'employers:vacancy_create' %}"
+                                   class="list-group-item list-group-item-action">
+                                    Создать вакансию
+                                </a>
+                                <a href="{% url 'employers:applications' %}"
+                                   class="list-group-item list-group-item-action">
+                                    Отклики
+                                    {% if new_applications > 0 %}
+                                        <span class="badge bg-danger float-end">{{ new_applications }}</span>
+                                    {% endif %}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'employers:company_edit' %}"
+                                   class="list-group-item list-group-item-action text-warning">
+                                    Создать профиль компании
+                                </a>
+                            {% endif %}
+                        {% endif %}
+
+                        <form method="post" action="{% url 'logout' %}" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="list-group-item list-group-item-action text-danger border-0 bg-transparent text-start w-100 px-3 py-2">
+                                Выйти
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-5 text-center bg-gradient-primary text-white"
+                         style="border-radius: 1rem; background: linear-gradient(135deg, #6e8efb, #a777e3);">
+                        <h2 class="fw-bold">Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h2>
+                        <p class="lead mb-0">
+                            {% if user.role == 'jobseeker' %}
+                                Готовы найти работу мечты? Начните с обновления резюме!
+                            {% elif user.role == 'employer' %}
+                                Ищете лучших кандидатов? Разместите вакансию прямо сейчас!
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Быстрые действия -->
+                <div class="row g-4 mb-5">
+                    {% if user.role == 'jobseeker' %}
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm text-center p-4 vacancy-card">
+                                <i class="fas fa-file-alt fa-4x text-primary mb-3"></i>
+                                <h5>Резюме</h5>
+                                <p class="text-muted">
+                                    {% if user.jobseeker_profile %}
+                                        Ваше резюме активно
+                                    {% else %}
+                                        Создайте резюме, чтобы начать поиск
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-outline-primary">
+                                    {% if user.jobseeker_profile %}Редактировать{% else %}Создать{% endif %}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm text-center p-4 vacancy-card">
+                                <i class="fas fa-search fa-4x text-success mb-3"></i>
+                                <h5>Поиск вакансий</h5>
+                                <p class="text-muted">Более {{ vacancies_count|default:"5000" }} актуальных вакансий</p>
+                                <a href="{% url 'employers:all_vacancies' %}" class="btn btn-success">
+                                    Найти работу
+                                </a>
+                            </div>
+                        </div>
+                    {% elif user.role == 'employer' %}
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm text-center p-4 vacancy-card">
+                                <i class="fas fa-plus-circle fa-4x text-primary mb-3"></i>
+                                <h5>Новая вакансия</h5>
+                                <a href="{% url 'employers:vacancy_create' %}" class="btn btn-primary mt-3">
+                                    Создать вакансию
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm text-center p-4 vacancy-card">
+                                <i class="fas fa-users fa-4x text-info mb-3"></i>
+                                <h5>Отклики</h5>
+                                <p class="text-muted">Новых откликов: <strong>{{ new_applications|default:0 }}</strong>
+                                </p>
+                                <a href="{% url 'employers:applications' %}" class="btn btn-info text-white mt-3">
+                                    Посмотреть
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

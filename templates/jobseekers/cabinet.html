@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Моё резюме — Работа.kg{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-start">
+                <div>
+                    <h2 class="fw-bold mb-1">Моё резюме</h2>
+                    {% if profile.is_open_to_work %}
+                        <span class="badge bg-success fs-6">Ищу работу</span>
+                    {% else %}
+                        <span class="badge bg-secondary fs-6">Не ищу работу</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'jobseekers:profile_edit' %}" class="btn btn-primary">
+                    Редактировать основную информацию
+                </a>
+            </div>
+        </div>
+
+        <!-- Основная информация профиля -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="fw-bold text-primary">
+                            {{ profile.desired_position|default:"Должность не указана" }}
+                        </h4>
+                        <p class="lead text-muted">
+                            {% if profile.desired_salary_from and profile.desired_salary_to %}
+                                от {{ profile.desired_salary_from|floatformat:0 }} до
+                                {{ profile.desired_salary_to|floatformat:0 }} сом
+                            {% elif profile.desired_salary_from %}
+                                от {{ profile.desired_salary_from|floatformat:0 }} сом
+                            {% elif profile.desired_salary_to %}
+                                до {{ profile.desired_salary_to|floatformat:0 }} сом
+                            {% else %}
+                                Зарплата не указана
+                            {% endif %}
+                        </p>
+                        <p><strong>Опыт работы:</strong> {{ profile.experience_years|default:"0" }} лет</p>
+                        {% if profile.phone_number %}
+                            <p><strong>Телефон:</strong> {{ profile.phone_number }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <small class="text-muted">
+                            Обновлено: {{ profile.updated_at|date:"d.m.Y в H:i"|default:"—" }}
+                        </small>
+                    </div>
+                </div>
+
+                {% if profile.about %}
+                    <hr>
+                    <h6 class="fw-bold">О себе</h6>
+                    <p class="text-muted">{{ profile.about|linebreaks }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Левая колонка: Опыт + Образование -->
+            <div class="col-lg-8">
+
+                <!-- ОПЫТ РАБОТЫ -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                        <h5 class="mb-0">Опыт работы</h5>
+                        <a href="{% url 'jobseekers:experience_add' %}" class="btn btn-success btn-sm">
+                            Добавить
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% for exp in experience_list %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold">{{ exp.position }} — {{ exp.company }}</h6>
+                                        <small class="text-muted">
+                                            {{ exp.start_date|date:"F Y" }}
+                                            — {% if exp.is_current %}настоящее время{% else %}
+                                            {{ exp.end_date|date:"F Y" }}{% endif %}
+                                        </small>
+                                        {% if exp.description %}
+                                            <p class="mt-2 mb-0 text-muted">{{ exp.description|linebreaks }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'jobseekers:remove_experience' exp.pk %}"
+                                       class="text-danger small ms-3"
+                                       onclick="return confirm('Удалить этот опыт работы?')">
+                                        Удалить
+                                    </a>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">Опыт работы не добавлен</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- ОБРАЗОВАНИЕ -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                        <h5 class="mb-0">Образование</h5>
+                        <a href="{% url 'jobseekers:education_add' %}" class="btn btn-success btn-sm">
+                            Добавить
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% for edu in education_list %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold">{{ edu.get_degree_display }} — {{ edu.specialty }}</h6>
+                                        <p class="mb-1">
+                                            {{ edu.institution }}{% if edu.faculty %}, {{ edu.faculty }}{% endif %}
+                                        </p>
+                                        <small class="text-muted">
+                                            {{ edu.start_year }}
+                                            — {% if edu.is_current %}по настоящее время{% else %}
+                                            {{ edu.end_year|default:"—" }}{% endif %}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'jobseekers:remove_education' edu.pk %}"
+                                       class="text-danger small ms-3"
+                                       onclick="return confirm('Удалить эту запись об образовании?')">
+                                        Удалить
+                                    </a>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">Образование не добавлено</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Навыки -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 1.5rem;">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Навыки</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <form method="post" action="{% url 'jobseekers:add_skill' %}" class="mb-4">
+                            {% csrf_token %}
+                            <select name="skill_id" class="form-select mb-2" required>
+                                <option value="">— Выберите навык —</option>
+                                {% for skill in all_skills %}
+                                    <option value="{{ skill.id }}">{{ skill.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="level" class="form-select mb-3">
+                                <option value="1">Начальный</option>
+                                <option value="2" selected>Средний</option>
+                                <option value="3">Продвинутый</option>
+                                <option value="4">Эксперт</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary w-100">Добавить</button>
+                        </form>
+
+                        <div class="mt-3">
+                            {% for js in skill_list %}
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div>
+                                        <strong>{{ js.skill.name }}</strong>
+                                        <small class="text-muted d-block">{{ js.get_level_display }}</small>
+                                    </div>
+                                    <a href="{% url 'jobseekers:remove_skill' js.skill.id %}"
+                                       class="text-danger small"
+                                       onclick="return confirm('Удалить навык «{{ js.skill.name }}»?')">
+                                        Удалить
+                                    </a>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted small">Навыков пока нет</p>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
