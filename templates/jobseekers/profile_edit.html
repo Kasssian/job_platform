@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load widget_tweaks %}   <!-- ЭТА СТРОКА ОБЯЗАТЕЛЬНА! -->
+{% load static %}
+{% load widget_tweaks %}
 
 {% block title %}Редактировать резюме — Работа.kg{% endblock %}
 
@@ -10,30 +11,29 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Редактировать резюме</h4>
-                    <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-sm">
-                        Назад
-                    </button>
+                    <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-outline-secondary btn-sm">Назад</a>
                 </div>
-                <div class="card-body">
+
+                <div class="card-body pt-4">
 
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-success alert-dismissible fade show">
+                            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show">
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         {% endfor %}
                     {% endif %}
 
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Желаемая должность *</label>
-                            {{ form.desired_position|add_class:"form-control form-control-lg" }}
+                            {{ form.desired_position|add_class:"form-control form-control-lg"|attr:"required" }}
                         </div>
 
-                        <div class="row g-3">
+                        <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Зарплата от</label>
                                 <div class="input-group">
@@ -50,7 +50,7 @@
                             </div>
                         </div>
 
-                        <div class="my-4">
+                        <div class="mb-4">
                             <label class="form-label fw-bold">Опыт работы (лет)</label>
                             {{ form.experience_years|add_class:"form-control" }}
                         </div>
@@ -62,21 +62,21 @@
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Телефон</label>
-                            {{ form.phone_number|add_class:"form-control" }}
+                            {{ form.phone_number|add_class:"form-control"|attr:"placeholder:+996 999 123 456" }}
                         </div>
 
-                        <div class="form-check mb-5">
-                            {{ form.is_open_to_work|add_class:"form-check-input" }}
+                        <div class="form-check form-switch mb-5">
+                            {{ form.is_open_to_work|add_class:"form-check-input"|attr:"role:switch" }}
                             <label class="form-check-label fw-bold">
                                 Ищу работу — резюме видно работодателям
                             </label>
                         </div>
 
+                        <hr class="my-5">
+
                         <div class="text-end">
-                            <button type="button" onclick="history.back()" class="btn btn-secondary px-4">
-                                Отмена
-                            </button>
-                            <button type="submit" class="btn btn-success px-5 ms-3">
+                            <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-secondary px-5">Отмена</a>
+                            <button type="submit" class="btn btn-success btn-lg px-5 ms-3">
                                 Сохранить изменения
                             </button>
                         </div>

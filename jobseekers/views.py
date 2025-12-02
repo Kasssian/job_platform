@@ -4,13 +4,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.views import View
 from django.views.generic import TemplateView, CreateView, UpdateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 from employers.models import Application, Vacancy
 from core_models.models import Skill
+from .forms import JobseekerProfileForm
 from .models import JobseekerProfile, Education, Experience, JobseekerSkill
-from django.db.models import Q
+from django.db.models import Q, Value, DecimalField
 
 
 # === ЛИЧНЫЙ КАБИНЕТ ===
@@ -31,25 +33,27 @@ class JobseekerCabinetView(LoginRequiredMixin, TemplateView):
 # === РЕДАКТИРОВАНИЕ ОСНОВНОЙ ИНФОРМАЦИИ (ГЛАВНОЕ!) ===
 class JobseekerProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = JobseekerProfile
-    fields = [
-        'desired_position',
-        'about',
-        'desired_salary_from',
-        'desired_salary_to',
-        'experience_years',
-        'phone_number',
-        'is_open_to_work'
-    ]
+    form_class = JobseekerProfileForm  # ← ОБЯЗАТЕЛЬНО!
     template_name = 'jobseekers/profile_edit.html'
-    success_url = reverse_lazy('jobseekers:cabinet')
+
+    # success_url на случай, если reverse_lazy не сработает (иногда бывает)
+    def get_success_url(self):
+        return reverse('jobseekers:cabinet')
 
     def get_object(self, queryset=None):
+        """Получаем или создаём профиль текущего пользователя"""
         profile, created = JobseekerProfile.objects.get_or_create(user=self.request.user)
         return profile
 
     def form_valid(self, form):
+        """Вызывается при валидной форме — сохраняем и показываем сообщение"""
         messages.success(self.request, "Резюме успешно обновлено!")
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        """Если форма невалидна — покажем ошибки"""
+        messages.error(self.request, "Проверьте правильность заполнения полей")
+        return super().form_invalid(form)
 
 
 # === МОИ ОТКЛИКИ ===
@@ -112,26 +116,35 @@ class ResumeListView(ListView):
     def get_queryset(self):
         qs = JobseekerProfile.objects.select_related('user').prefetch_related('skills__skill')
 
-        q = self.request.GET.get('q')
-        salary = self.request.GET.get('salary_from')
-        skill_id = self.request.GET.get('skill')
-
+        q = self.request.GET.get('q', '').strip()
         if q:
             qs = qs.filter(
                 Q(user__first_name__icontains=q) |
                 Q(user__last_name__icontains=q) |
-                Q(desired_position__icontains=q)
+                Q(user__username__icontains=q) |
+                Q(desired_position__icontains=q) |
+                Q(about__icontains=q)
             )
-        if salary:
-            qs = qs.filter(desired_salary_from__gte=salary)
-        if skill_id:
+
+        salary_from = self.request.GET.get('salary_from')
+        if salary_from and salary_from.isdigit():
+            salary = int(salary_from)
+            qs = qs.annotate(
+                salary_effective=Coalesce(
+                    'desired_salary_from',
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
+            ).filter(salary_effective__gte=salary)
+
+        skill_id = self.request.GET.get('skill')
+        if skill_id and skill_id.isdigit():
             qs = qs.filter(skills__skill_id=skill_id)
 
         return qs.distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['skills'] = Skill.objects.all()[:20]  # популярные навыки
+        context['skills'] = Skill.objects.all()[:30]
         return context
 
 

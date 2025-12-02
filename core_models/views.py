@@ -16,6 +16,7 @@ from .forms import CustomUserCreationForm
 from .models import Category
 from .models import Skill, Notification, Review
 from .serializers import CategorySerializer, SkillSerializer, NotificationSerializer, ReviewSerializer
+from employers.models import Vacancy
 
 
 class CustomLoginView(LoginView):
@@ -28,12 +29,35 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
-        try:
-            from employers.models import Vacancy
-            context['recent_vacancies'] = Vacancy.objects.filter(is_active=True)[:8]
-        except:
-            context['recent_vacancies'] = []
+        user = self.request.user
+
+        if user.is_authenticated:
+            if hasattr(user, 'role') and user.role == 'employer' and user.company:
+                # Работодатель — показываем свежие резюме (открытые для поиска)
+                context['recent_resumes'] = JobseekerProfile.objects.filter(
+                    is_open_to_work=True
+                ).select_related('user').prefetch_related('skills__skill')[:12]
+
+                context['card_title'] = "Свежие резюме соискателей"
+                context['card_link'] = "jobseekers:resume_list"
+                context['card_link_text'] = "Все резюме →"
+
+            else:
+                # Соискатель или не работодатель — показываем свежие вакансии
+                context['recent_vacancies'] = Vacancy.objects.filter(
+                    is_active=True
+                )[:12]
+
+                context['card_title'] = "Актуальные вакансии"
+                context['card_link'] = "employers:all_vacancies"
+                context['card_link_text'] = "Все вакансии →"
+        else:
+            # Гость — показываем вакансии (чтобы мотивировать зарегистрироваться)
+            context['recent_vacancies'] = Vacancy.objects.filter(is_active=True)[:12]
+            context['card_title'] = "Найдите работу мечты"
+            context['card_link'] = "employers:all_vacancies"
+            context['card_link_text'] = "Смотреть все вакансии →"
+
         return context
 
 

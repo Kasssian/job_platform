@@ -1,107 +1,122 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Главная — Работа.kg{% endblock %}
+{% block title %}Работа.kg — Работа и карьера в Кыргызстане{% endblock %}
 
 {% block content %}
-    <!-- Hero Section -->
-    <section class="bg-primary text-white py-5">
-        <div class="container py-5">
-            <div class="row align-items-center">
-                <div class="col-lg-7">
-                    <h1 class="display-4 fw-bold">Найдите работу мечты или идеального сотрудника</h1>
-                    <p class="lead mb-4">Более 10 000 актуальных вакансий и резюме в Кыргызстане</p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="#" class="btn btn-light btn-lg">Я ищу работу</a>
-                        <a href="#" class="btn btn-outline-light btn-lg">Я работодатель</a>
-                    </div>
-                </div>
-                <div class="col-lg-5 text-center mt-4 mt-lg-0">
-                    <img src="{% static 'img/hero-illustration.svg' %}" alt="Поиск работы" class="img-fluid"
-                         style="max-width: 380px;">
-                </div>
-            </div>
+<section class="bg-primary text-white py-5">
+    <div class="container py-5 text-center">
+        <h1 class="display-4 fw-bold">Найдите работу или сотрудника в Кыргызстане</h1>
+        <p class="lead mt-4 mb-5">
+            Простая и честная платформа для поиска работы и найма сотрудников.<br>
+            Без посредников. Без скрытых платежей. Только реальные вакансии и резюме.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'core:register' %}" class="btn btn-light btn-lg px-5">Зарегистрироваться</a>
+                <a href="{% url 'core:login' %}" class="btn btn-outline-light btn-lg px-5">Войти</a>
+            {% else %}
+                {% if user.role == 'employer' %}
+                    <a href="{% url 'employers:employer_cabinet' %}" class="btn btn-light btn-lg">Личный кабинет</a>
+                {% else %}
+                    <a href="{% url 'jobseekers:cabinet' %}" class="btn btn-light btn-lg">Моё резюме</a>
+                {% endif %}
+            {% endif %}
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Categories -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5 fw-bold">Популярные категории</h2>
-            <div class="row g-4">
-                {% for category in categories %}
-                    <div class="col-md-3 col-6">
-                        <a href="#" class="text-decoration-none">
-                            <div class="text-center p-4 bg-white rounded-3 shadow-sm vacancy-card">
-                                <i class="fas fa-laptop-code fa-3x text-primary mb-3"></i>
-                                <h6 class="fw-semibold">{{ category.name }}</h6>
-                            </div>
-                        </a>
+<!-- КАРТОЧКИ ВАКАНСИЙ ИЛИ РЕЗЮМЕ -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">{{ card_title }}</h2>
+            <a href="{% url card_link %}" class="text-primary fw-bold">{{ card_link_text }}</a>
+        </div>
+
+        <div class="row g-4">
+            {% if recent_vacancies %}
+                {% for vac in recent_vacancies %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">
+                                <a href="{% url 'employers:vacancy_detail' vac.id %}" class="text-dark text-decoration-none">
+                                    {{ vac.title }}
+                                </a>
+                            </h5>
+                            <p class="text-primary mb-2">{{ vac.company.name }}</p>
+                            <p class="text-muted small">
+                                {% if vac.salary_from %}от {{ vac.salary_from }} сом{% endif %}
+                                {% if vac.salary_to %} до {{ vac.salary_to }} сом{% endif %}
+                                • {{ vac.location }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-muted small">
+                            {{ vac.created_at|date:"d.m.Y" }}
+                        </div>
                     </div>
-                {% empty %}
-                    <p class="text-center text-muted">Категории пока не добавлены.</p>
+                </div>
                 {% endfor %}
-            </div>
-        </div>
-    </section>
 
-    <!-- Recent Vacancies -->
-    {% if recent_vacancies %}
-        <section class="py-5 bg-light">
-            <div class="container">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">Свежие вакансии</h2>
-                    <a href="#" class="btn btn-outline-primary">Все вакансии →</a>
-                </div>
-                <div class="row g-4">
-                    {% for vacancy in recent_vacancies %}
-                        <div class="col-lg-6">
-                            <div class="card h-100 shadow-sm vacancy-card border-0">
-                                <div class="card-body">
-                                    <h5 class="card-title fw-bold">{{ vacancy.title }}</h5>
-                                    <p class="text-muted mb-2">
-                                        <i class="fas fa-building"></i> {{ vacancy.company.name }}
-                                    </p>
-                                    <p class="text-muted mb-3">
-                                        <i class="fas fa-map-marker-alt"></i> {{ vacancy.location }}
-                                        {% if vacancy.salary_from %}
-                                            • {{ vacancy.salary_from|floatformat:0 }} —
-                                            {% if vacancy.salary_to %}{{ vacancy.salary_to|floatformat:0 }}{% else %}
-                                                договорная{% endif %} сом
-                                        {% endif %}
-                                    </p>
-                                    <p class="card-text text-truncate-3">{{ vacancy.description|truncatewords:30 }}</p>
-                                    <a href="#" class="btn btn-primary mt-2">Подробнее</a>
+            {% elif recent_resumes %}
+                {% for profile in recent_resumes %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if profile.photo %}
+                                    <img src="{{ profile.photo.url }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        {{ profile.user.get_full_name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="fw-bold mb-0">
+                                        <a href="{% url 'jobseekers:resume_detail' profile.user.username %}" class="text-dark">
+                                            {{ profile.user.get_full_name|default:profile.user.username }}
+                                        </a>
+                                    </h6>
+                                    <p class="text-primary small mb-0">{{ profile.desired_position }}</p>
                                 </div>
                             </div>
+                            <p class="text-muted small mt-auto">
+                                {% if profile.desired_salary_from %}от {{ profile.desired_salary_from }} сом{% endif %}
+                                {% if profile.experience_years > 0 %} • {{ profile.experience_years }} лет опыта{% endif %}
+                            </p>
                         </div>
-                    {% endfor %}
+                        <div class="card-footer bg-transparent text-muted small text-end">
+                            {{ profile.updated_at|date:"d.m.Y" }}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
-    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Пока ничего нет. Будьте первыми!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
 
-    <!-- Stats -->
-    <section class="py-5 bg-primary text-white">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <h3 class="display-5 fw-bold">10,000+</h3>
-                    <p>Активных вакансий</p>
-                </div>
-                <div class="col-md-3">
-                    <h3 class="display-5 fw-bold">5,000+</h3>
-                    <p>Соискателей</p>
-                </div>
-                <div class="col-md-3">
-                    <h3 class="display-5 fw-bold">500+</h3>
-                    <p>Компаний</p>
-                </div>
-                <div class="col-md-3">
-                    <h3 class="display-5 fw-bold">98%</h3>
-                    <p>Довольных пользователей</p>
-                </div>
+<!-- О ПРОЕКТЕ -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bold mb-4">О проекте Работа.kg</h2>
+                <p class="lead text-muted">
+                    Мы создали простой и честный сервис для поиска работы и сотрудников в Кыргызстане.<br>
+                    Здесь нет платных поднятий, скрытых комиссий и фейковых объявлений.
+                </p>
+                <p class="text-muted">
+                    Соискатели размещают резюме бесплатно. Работодатели публикуют вакансии бесплатно.<br>
+                    Всё прозрачно. Всё по-честному.
+                </p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 {% endblock %}
